@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         EduPage – Vážený priemer známok po predmetoch (SK)
 // @namespace    https://github.com/psimkovic/edupage-web-priemer-tampermonkey
-// @version      1.1
+// @version      1.2
 // @description  Zobrazí priemer známok na WEB stránke edupage Známky. Na mobilných zariadeniach sa priemer zobrazuje automaticky.
 // @author       Peter
 // @match        https://*.edupage.org/*

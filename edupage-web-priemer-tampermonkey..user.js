@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         EduPage – Weighted Grade Average per Subject
-// @namespace    https://github.com/peter/edupage-gpa
+// @name         EduPage – Vážený priemer známok po predmetoch (SK)
+// @namespace    https://github.com/psimkovic/edupage-web-priemer-tampermonkey
 // @version      1.1
-// @description  Shows a weighted grade-point average next to every subject on the EduPage grades page (Váha udalosti = grade weight).
+// @description  Zobrazí priemer známok na WEB stránke edupage Známky. Na mobilných zariadeniach sa priemer zobrazuje automaticky.
 // @author       Peter
 // @match        https://*.edupage.org/*
 // @run-at       document-idle
@@ -12,25 +12,26 @@
 (function () {
     'use strict';
 
-    // ---- How the average is computed -------------------------------------
-    // Each subject (tr.predmetRow) has one or more event rows (tr.udalostRow)
-    // sharing the same data-predmetid. ONLY the event rows are used – grades
+    // ---- Ako sa priemer počíta ---------------------------------------------
+    // Každý predmet (tr.predmetRow) má jeden alebo viacero riadkov
+    // (tr.udalostRow) zdiaľajúcich rovnaký data-predmetid. Použije sa LEN
+    // riadky udalosti – známky, ktoré sú na riadku s predmetom sú ignorované
     // shown inline on the subject row are ignored.
     //
-    // An event row holds the grade(s) for that event and, optionally,
-    // "Váha udalosti: N×" = the weight. Missing weight -> 1. Weight 0 -> the
-    // grade is ignored.
+    // Riadok udalosti obsahuje jednu alebo viacero známok, ktoré môžu mať
+    // váhu udalosti, označené ako "Váha udalosti: N×" = váha. Ak tam váha nie
+    // je -> váha 1. Váha 0 -> známky sú ignorované.
     //
-    //   average = Σ(grade × weight) / Σ(weight)
+    //   primer = Σ(známka × váha) / Σ(váha)
     //
-    // Grade parsing:
-    //   * normal grades live in  span.znZnamka  (e.g. "1", "2", "1-", "2+")
-    //   * a normal grade containing "%" is ignored
-    //   * evaluation grades live in  span.znamkaVyhodnotenie
-    //     (e.g. "15 / 18 = 83.3% → 2") – the number after "→" is the grade
-    //   * +/- around the number is dropped; only grades 1–5 are accepted
+    // Získavanie známok:
+    //   * normálne známky sú v span.znZnamka  (napr. "1", "2", "1-", "2+")
+    //   * normálne známky obsahujúce "%" sú ignorované
+    //   * vyhodnotené známky z testov sú v span.znamkaVyhodnotenie
+    //     (napr. "15 / 18 = 83.3% → 2") – číslo za "→" je známka
+    //   * +/- okolo známky je ignorované; berú sa len známky 1–5
     //
-    // Lower is better (Slovak 1–5 scale).
+    // Nižšia známka je lepšia (štandardná slovenská stupnica 1-5).
     // ----------------------------------------------------------------------
 
     const BADGE_CLASS = 'gpa-weighted-badge';
